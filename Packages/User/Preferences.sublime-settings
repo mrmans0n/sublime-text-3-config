@@ -1,0 +1,9 @@
+{
+	"color_scheme": "Packages/RailsCasts Colour Scheme/RailsCastsColorScheme.tmTheme",
+	"ignored_packages":
+	[
+		"Vintage"
+	],
+	"font_face": "Source Code Pro Light",
+	"font_size": 13
+}
