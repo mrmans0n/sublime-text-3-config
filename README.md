@@ -8,7 +8,7 @@ Taking inspiration of some devs that did this in the past, I'm doing it too. Bec
 Quit Sublime Text 3.
 
     $ rm -rf ~/Library/Application \Support\Sublime\ Text\ 3
-    $ git clone https://github.com/mrmans0n/sublime.git ~/Library/Application\ Support\Sublime\ Text\ 3
+    $ git clone https://github.com/mrmans0n/sublime-text-3-config.git ~/Library/Application\ Support\Sublime\ Text\ 3
 
 Open Sublime Text 3.
 
