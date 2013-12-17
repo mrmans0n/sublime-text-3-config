@@ -1,3 +1,4 @@
 [
-	{ "keys": ["alt+command+l"], "command": "reindent" , "args": { "single_line": false } }
+{ "keys": ["alt+command+l"], "command": "reindent" , "args": { "single_line": false } },
+{ "keys": ["command+shift+."], "command": "erb" }
 ]
