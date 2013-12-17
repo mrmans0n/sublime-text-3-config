@@ -1,4 +1,14 @@
 {
 	"tab_size": 2,
-	"translate_tabs_to_spaces": true
+	"translate_tabs_to_spaces": true,
+	"extensions":
+	[
+	"ru",
+	"podspec",
+	"Cheffile",
+	"Locfile",
+	"Dashfile",
+	".irbrc",
+	"Podfile"
+	]
 }
