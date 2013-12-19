@@ -14,6 +14,12 @@ Open Sublime Text 3.
 
 You may need to [manually install Package Control](https://sublime.wbond.net/installation).
 
+## Adding alias
+
+For being able to use `subl` in the terminal, you should execute this.
+
+`sudo ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/bin/subl`
+
 ## Keeping it up to date
 
 You should add then this line to your .bash_profile, .zshrc or any other similar script. 
