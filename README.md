@@ -13,3 +13,9 @@ Quit Sublime Text 3.
 Open Sublime Text 3.
 
 You may need to [manually install Package Control](https://sublime.wbond.net/installation).
+
+## Keeping it up to date
+
+You should add then this line to your .bash_profile, .zshrc or any other similar script. 
+
+`cd "Library/Application Support/Sublime Text 3/";git pull;cd`
