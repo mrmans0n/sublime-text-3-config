@@ -5,3 +5,4 @@ Local
 *.cache
 Packages/User/Package Control.last-run
 Packages/User/Package Control.system-ca-bundle
+.DS_Store
