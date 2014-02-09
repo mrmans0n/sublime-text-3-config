@@ -1,6 +1,7 @@
 {
 	"installed_packages":
 	[
+		"HTML Mustache",
 		"Rails Developer Snippets",
 		"RailsCasts Colour Scheme",
 		"Ruby Debugger",

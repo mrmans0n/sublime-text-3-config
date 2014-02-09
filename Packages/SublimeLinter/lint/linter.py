@@ -363,6 +363,7 @@ class Linter(metaclass=LinterMeta):
     lint_settings = None
     env = None
     disabled = False
+    executable_version = None
 
     @classmethod
     def initialize(cls):
@@ -1293,7 +1294,7 @@ class Linter(metaclass=LinterMeta):
                                 break
 
                 if col is not None:
-                    self.highlight.range(line, col, error_type=error_type, word_re=self.word_re)
+                    self.highlight.range(line, col, near=near, error_type=error_type, word_re=self.word_re)
                 elif near:
                     col = self.highlight.near(line, near, error_type=error_type, word_re=self.word_re)
                 else:
@@ -1439,17 +1440,17 @@ class Linter(metaclass=LinterMeta):
 
         """
 
-        version = None
+        cls.executable_version = None
 
         if cls.executable_path == '<builtin>':
             if callable(getattr(cls, 'get_module_version', None)):
                 if not(cls.version_re and cls.version_requirement):
                     return True
 
-                version = cls.get_module_version()
+                cls.executable_version = cls.get_module_version()
 
-                if version:
-                    persist.debug('{} version: {}'.format(cls.name, version))
+                if cls.executable_version:
+                    persist.debug('{} version: {}'.format(cls.name, cls.executable_version))
                 else:
                     persist.printf('WARNING: {} unable to determine module version'.format(cls.name))
             else:
@@ -1457,21 +1458,24 @@ class Linter(metaclass=LinterMeta):
         elif not(cls.version_args is not None and cls.version_re and cls.version_requirement):
             return True
 
-        if version is None:
-            version = cls.get_executable_version()
+        if cls.executable_version is None:
+            cls.executable_version = cls.get_executable_version()
 
-        if version:
+        if cls.executable_version:
             predicate = VersionPredicate(
                 '{} ({})'.format(cls.name.replace('-', '.'), cls.version_requirement)
             )
 
-            if predicate.satisfied_by(version):
-                persist.debug('{}: ({}) satisfied by {}'.format(cls.name, cls.version_requirement, version))
+            if predicate.satisfied_by(cls.executable_version):
+                persist.debug(
+                    '{}: ({}) satisfied by {}'
+                    .format(cls.name, cls.version_requirement, cls.executable_version)
+                )
                 return True
             else:
                 persist.printf(
                     'WARNING: {} deactivated, version requirement ({}) not fulfilled by {}'
-                    .format(cls.name, cls.version_requirement, version)
+                    .format(cls.name, cls.version_requirement, cls.executable_version)
                 )
 
         return False
@@ -1523,9 +1527,6 @@ class Linter(metaclass=LinterMeta):
     def error(self, line, col, message, error_type):
         """Add a reference to an error/warning on the given line and column."""
         self.highlight.line(line, error_type)
-
-        # Capitalize the first word
-        message = message[0].upper() + message[1:]
 
         # Some linters use html entities in error messages, decode them
         message = HTML_ENTITY_RE.sub(self.replace_entity, message)
