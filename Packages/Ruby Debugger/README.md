@@ -36,7 +36,6 @@ is to [install](#installation) Debugger plugin and press on
 * Linux, Window, OSX support
 
 ## Soon
-* MRI 2.0 support
 * Sublime 2 support
 * Edit and remove watch expressions
 
@@ -80,7 +79,7 @@ Here is a complete list of commands you can find Command Pallette under the `Deb
 Run command ```gem install debugger```
 
 #### Ruby 2.0.0
-Run command ```gem install byebug --version'>=2.5.0'```
+Run command ```gem install byebug --version '>=2.5.0'```
 
 ### Sublime Ruby Debugger
 
