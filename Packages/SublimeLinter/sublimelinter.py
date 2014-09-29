@@ -28,6 +28,7 @@ def plugin_loaded():
     persist.plugin_is_loaded = True
     persist.settings.load()
     persist.printf('debug mode:', 'on' if persist.debug_mode() else 'off')
+    util.create_tempdir()
 
     for linter in persist.linter_classes.values():
         linter.initialize()
@@ -63,6 +64,7 @@ class SublimeLinter(sublime_plugin.EventListener):
         return cls.shared_instance
 
     def __init__(self, *args, **kwargs):
+        """Initialize a new instance."""
         super().__init__(*args, **kwargs)
 
         # Keeps track of which views we have assigned linters to
@@ -202,7 +204,7 @@ class SublimeLinter(sublime_plugin.EventListener):
         syntax = persist.get_syntax(view)
 
         # Syntax either has never been set or just changed
-        if not vid in self.view_syntax or self.view_syntax[vid] != syntax:
+        if vid not in self.view_syntax or self.view_syntax[vid] != syntax:
             self.view_syntax[vid] = syntax
             Linter.assign(view, reset=True)
             self.clear(view)
@@ -216,14 +218,28 @@ class SublimeLinter(sublime_plugin.EventListener):
 
     def is_scratch(self, view):
         """
-        Return whether a view is scratch.
+        Return whether a view is effectively scratch.
 
         There is a bug (or feature) in the current ST3 where the Find panel
         is not marked scratch but has no window.
 
+        There is also a bug where settings files opened from within .sublime-package
+        files are not marked scratch during the initial on_modified event, so we have
+        to check that a view with a filename actually exists on disk if the file
+        being opened is in the Sublime Text packages directory.
+
         """
 
-        return view.is_scratch() or view.window() is None
+        if view.is_scratch() or view.is_read_only() or view.window() is None:
+            return True
+        elif (
+            view.file_name() and
+            view.file_name().startswith(sublime.packages_path() + os.path.sep) and
+            not os.path.exists(view.file_name())
+        ):
+            return True
+        else:
+            return False
 
     def view_has_file_only_linter(self, vid):
         """Return True if any linters for the given view are file-only."""
@@ -266,8 +282,8 @@ class SublimeLinter(sublime_plugin.EventListener):
         self.check_syntax(view)
         view_id = view.id()
 
-        if not view_id in self.linted_views:
-            if not view_id in self.loaded_views:
+        if view_id not in self.linted_views:
+            if view_id not in self.loaded_views:
                 self.on_new(view)
 
             if persist.settings.get('lint_mode', 'background') in ('background', 'load/save'):
@@ -292,7 +308,7 @@ class SublimeLinter(sublime_plugin.EventListener):
 
         if not filename:
             return False
-        
+
         if not filename.startswith(sublime.packages_path()):
             return False
 
@@ -418,44 +434,45 @@ class SublimeLinter(sublime_plugin.EventListener):
             filename = os.path.basename(view.file_name())
 
             if filename == '.sublimelinterrc':
-                # If it's the main .sublimelinterrc, reload the settings
-                rc_path = os.path.join(os.path.dirname(__file__), '.sublimelinterrc')
-
-                if view.file_name() == rc_path:
-                    persist.settings.load(force=True)
-                else:
-                    self.lint_all_views()
+                # If a .sublimelinterrc has changed, to be safe
+                # clear the rc cache and relint.
+                util.get_rc_settings.cache_clear()
+                self.lint_all_views()
 
             # If a file other than one of our settings files changed,
             # check if the syntax changed or if we need to show errors.
             elif filename != 'SublimeLinter.sublime-settings':
-                syntax_changed = self.check_syntax(view)
-                vid = view.id()
-                mode = persist.settings.get('lint_mode', 'background')
-                show_errors = persist.settings.get('show_errors_on_save', False)
+                self.file_was_saved(view)
 
-                if syntax_changed:
-                    self.clear(view)
+    def file_was_saved(self, view):
+        """Check if the syntax changed or if we need to show errors."""
+        syntax_changed = self.check_syntax(view)
+        vid = view.id()
+        mode = persist.settings.get('lint_mode', 'background')
+        show_errors = persist.settings.get('show_errors_on_save', False)
 
-                    if vid in persist.view_linters:
-                        if mode != 'manual':
-                            self.lint(vid)
-                        else:
-                            show_errors = False
-                    else:
-                        show_errors = False
+        if syntax_changed:
+            self.clear(view)
+
+            if vid in persist.view_linters:
+                if mode != 'manual':
+                    self.lint(vid)
                 else:
-                    if (
-                        show_errors or
-                        mode in ('load/save', 'save only') or
-                        mode == 'background' and self.view_has_file_only_linter(vid)
-                    ):
-                        self.lint(vid)
-                    elif mode == 'manual':
-                        show_errors = False
+                    show_errors = False
+            else:
+                show_errors = False
+        else:
+            if (
+                show_errors or
+                mode in ('load/save', 'save only') or
+                mode == 'background' and self.view_has_file_only_linter(vid)
+            ):
+                self.lint(vid)
+            elif mode == 'manual':
+                show_errors = False
 
-                if show_errors and vid in persist.errors and persist.errors[vid]:
-                    view.run_command('sublimelinter_show_all_errors')
+        if show_errors and vid in persist.errors and persist.errors[vid]:
+            view.run_command('sublimelinter_show_all_errors')
 
     def on_close(self, view):
         """Called after view is closed."""

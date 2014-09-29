@@ -1,9 +1,9 @@
-# SublimeRubyDebugger
-debugger plugin for interactive ruby and RoR debugging on Sublime Text.
+# Sublime Ruby Debugger
+A debugger plugin for interactive ruby and RoR debugging on Sublime Text.
 
 ![SublimeRubyDebugger](http://i.imgur.com/PwjudlY.png)
 
-Based [Debugger gem](https://github.com/cldwalker/debugger) package by [Shuky chen](https://github.com/shuky19).
+By [Shuky chen](https://github.com/shuky19), based on the [Debugger](https://github.com/cldwalker/debugger) and [Byebug](https://github.com/deivid-rodriguez/byebug) gems.
 
 ## Overview
 * [First Steps](#first-steps)
@@ -18,25 +18,23 @@ Based [Debugger gem](https://github.com/cldwalker/debugger) package by [Shuky ch
 
 
 ## First steps
-In order to start debugging ruby or RoR applications all you need to do
-
-is to [install](#installation) Debugger plugin and press on
-<kbd>F6</kbd> or <kbd>Shift+F6</kbd> or <kbd>Alt+Shift+F6</kbd>
+In order to start debugging ruby or RoR applications all you need to do is to
+[install](#installation) Debugger plugin and press on <kbd>F6</kbd> or
+<kbd>Shift+F6</kbd> or <kbd>Alt+Shift+F6</kbd>
 
 ## Features
-* Local debugging Ruby and RoR applications.
-* Stepping up, down ,over and into while debugging (jumps and goto also available).
-* Add watch expression and run immidiate code using the current program context.
-* Monitoring on stack, threads, output and local variables in the program.
+* Local debugging in Ruby and RoR applications.
+* Stepping up, down, over, and into while debugging (jumps and goto also available).
+* Add watch expression and run immediate code using the current program context.
+* Monitoring on stack, threads, output, and local variables in the program.
 * Builtin rails support.
-* Breakpoints, conditional breakpoints and temporary breakpoints (goto) support.
-* Works on Sublime Text 3 (later version will work on both 2 and 3)
+* Breakpoints, conditional breakpoints, and temporary breakpoints (goto) support.
+* Works in Sublime Text 2 and 3.
 * MRI 1.9.3 support (using debugger gem).
-* MRI 2.0.0 support (using my fork for byebug gem).
+* MRI 2.0.0 support (using byebug gem).
 * Linux, Window, OSX support
 
 ## Soon
-* Sublime 2 support
 * Edit and remove watch expressions
 
 ## Commands
@@ -57,8 +55,8 @@ Here is a complete list of commands you can find Command Pallette under the `Deb
 #### Cursor control
 * Step Over - <kbd>F10</kbd>
 * Step Into - <kbd>F11</kbd>
-* Step up -  - <kbd>Alt+d, u</kbd>
-* Step down -  - <kbd>Alt+d, d</kbd>
+* Step up - <kbd>Alt+d, u</kbd>
+* Step down - <kbd>Alt+d, d</kbd>
 * Continue - <kbd>F8</kbd>
 * Run To Line (goto) - <kbd>ctrl+F10</kbd> or <kbd>⌘+F10</kbd>
 * Jumo to line - <kbd>Ctrl+Shift+F10</kbd> or <kbd>⌘+Shift+F10</kbd>
@@ -75,11 +73,14 @@ Here is a complete list of commands you can find Command Pallette under the `Deb
 ## Installation
 
 ### Gem dependencies
-#### Ruby 1.9.3
-Run command ```gem install debugger```
 
-#### Ruby 2.0.0
-Run command ```gem install byebug --version '>=2.5.0'```
+Sublime Debugger relies on two seperate gems for diffirent ruby versions. For Ruby 1.9.3 you need the debugger gem, which can be installed using ```gem install debugger```, and for Ruby 2.0.0 you need the byebug gem, which can be installed using ```gem install byebug```.
+
+### Unsupported ruby versions
+
+I cannot test this against all ruby versions, so I only explicity support Ruby 1.9.3 and Ruby 2.0.0. [RVM](https://wiki.archlinux.org/index.php/RVM) is a good way to have multiple ruby versions installed at once and switch between them when debugging or running normally. Sublime Debugger will use the ruby version that you set as default, so you must set either Ruby 1.9.3 or Ruby 2.0.0 as the default. Remember to reinstall the byebug or debugger gem when you change ruby versions, or else you will get an ```Connection could not be made: [Errno ##] Connection refused``` error.
+
+If you need to have your ruby program running with an unspported ruby version you can manually add the version to the supported versions list. In the package's directory, which you can get to by going to ```preferences -> browse packages``` in sublime text and then opening the ```Ruby Debugger``` folder, there is a ```ruby_version_discoverer.rb``` file where you can add your ruby version.
 
 ### Sublime Ruby Debugger
 
@@ -92,8 +93,7 @@ Clone the repository by executing the following command in your Packages directo
 ```git clone https://github.com/shuky19/sublime_debugger.git "Ruby Debugger"```
 
 #### Download
-Get the latest [source from GitHub](https://github.com/shuky19/sublime_debugger/archive/master.zip) and extract the source into your Packages directory
-to a folder named "Ruby Debugger".
+Get the latest [source from GitHub](https://github.com/shuky19/sublime_debugger/archive/master.zip) and extract the source into your Packages directory to a folder named "Ruby Debugger".
 
 
 *__Note:__ You can locate your Packages directory in the menu under* `Preferences / Browse Packages...`
@@ -101,17 +101,28 @@ to a folder named "Ruby Debugger".
 
 ## Troubleshoot
 
-#### Why do i get on the output window "Errno::EADDRINUSE: Address already in use - bind(2)"?
-Thats because there is another process running on your OS who is using the port 8989/8990
+#### Why do I get ```Connection could not be made: [Errno 61] Connection refused``` in the output window?
 
-Another option is that the last debugger process is still alive
+Well, Most of the reasons for this error come from environmental problems, following the steps below will help you fix it:
+
+* Enable logging: preferences -> Package Settings -> Ruby Debugger -> Settings - Default (you can use User as well)
+* Run you ruby on a shell and make sure it runs perfectly.
+* From that shell run ```which ruby``` and ```ruby --version```
+* Run the debugger and compare its output to yours
+* Figure out whether your ruby path comes from a different ruby environment (rbenv | rvm | custom executable)
+* Figure out whether your ruby default version is not set appropriately
+
+
+#### Why do I get ```Errno::EADDRINUSE: Address already in use - bind(2)``` in the output window?
+Either because there is another process running which is using ports 8989/8990 or the last debugger process is still alive (```killall ruby``` will solve that).
 
 ## License
 
-SublimeTextXdebug is released under the [MIT License](http://www.opensource.org/licenses/MIT).
+RubyDebugger is released under the [MIT License](http://www.opensource.org/licenses/MIT).
 
 ## Todo
 
+* Settings file
 * Break point windows updates
 * Set view cursor on debug cursor change
 * Nice message when port is taken
